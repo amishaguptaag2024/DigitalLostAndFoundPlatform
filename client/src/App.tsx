@@ -24,7 +24,7 @@ function App() {
 				path="/forgot-password"
 				element={<ForgotPasswordPage />}
 			/>
-			<Route path="/chat/:roomId" element={<AnonymousChatPage />} />
+			<Route path="/chat/:roomId " element={<AnonymousChatPage />} />
 		</Routes>
 	);
 }
