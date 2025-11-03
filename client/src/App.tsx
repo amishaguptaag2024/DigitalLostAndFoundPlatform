@@ -6,26 +6,14 @@ import { ForgotPasswordPage } from "./pages/auth/ForgotPasswordPage";
 import { AnonymousChatPage } from "./pages/chat/AnonymousChatPage";
 
 function App() {
-	return (
-		<Routes>
-			<Route
-				path="/"
-				element={<LandingPage />}
-			/>
-			<Route
-				path="/login"
-				element={<LoginPage />}
-			/>
-			<Route
-				path="/register"
-				element={<RegisterPage />}
-			/>
-			<Route
-				path="/forgot-password"
-				element={<ForgotPasswordPage />}
-			/>
-			<Route path="/chat/:roomId " element={<AnonymousChatPage />} />
-		</Routes>
-	);
+  return (
+    <Routes>
+      <Route path="/" element={<LandingPage />} />
+      <Route path="/login" element={<LoginPage />} />
+      <Route path="/register" element={<RegisterPage />} />
+      <Route path="/forgot-password" element={<ForgotPasswordPage />} />
+      <Route path="/chat/:roomId" element={<AnonymousChatPage />} />
+    </Routes>
+  );
 }
 export default App;

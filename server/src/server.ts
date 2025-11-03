@@ -1,16 +1,25 @@
 import app from "./app";
 import mongoose from "mongoose";
+import { STORAGE_TYPE, MONGO_URI, PORT } from "./config";
+import { getStorageService } from "./services/storageFactory";
 
-const PORT = process.env.PORT || 5000;
-const MONGO_URI = process.env.MONGO_URI || "mongodb://localhost:27017/digital_lost_and_found";
+// Initialize storage service early to set up the instance
+getStorageService();
 
-mongoose
-	.connect(MONGO_URI)
-	.then(() => {
-		app.listen(PORT, () => console.log(`Server running on port ${PORT}`));
-	})
-	.catch((err) => {
-		console.error("Failed to connect to MongoDB", err);
-		// Still start the server (use in-memory or limited functionality) so dev can see endpoints fail gracefully
-		app.listen(PORT, () => console.log(`Server running on port ${PORT} (no DB)`));
-	});
+// Only connect to MongoDB if using MongoDB storage
+if (STORAGE_TYPE === "mongodb") {
+  mongoose
+    .connect(MONGO_URI)
+    .then(() => {
+      console.log("✅ Connected to MongoDB");
+      app.listen(PORT, () => console.log(`🚀 Server running on port ${PORT}`));
+    })
+    .catch((err) => {
+      console.error("❌ Failed to connect to MongoDB", err);
+      console.error("💡 Tip: Set STORAGE_TYPE=memory to use in-memory storage");
+      process.exit(1);
+    });
+} else {
+  // Using in-memory storage, no MongoDB needed
+  app.listen(PORT, () => console.log(`🚀 Server running on port ${PORT}`));
+}

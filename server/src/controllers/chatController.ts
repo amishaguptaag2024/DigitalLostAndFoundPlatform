@@ -1,5 +1,5 @@
 import { Request, Response } from "express";
-import { Message, ChatRoom } from "../models/Chat";
+import { getStorageService } from "../services/storageFactory";
 
 export const createMessage = async (req: Request, res: Response) => {
   const { roomId } = req.params;
@@ -9,21 +9,13 @@ export const createMessage = async (req: Request, res: Response) => {
   }
 
   try {
-    // Ensure room exists
-    let room = await ChatRoom.findOne({ _id: roomId });
-    if (!room) {
-      // If roomId looks like an ObjectId, create room using provided id
-      try {
-        room = await ChatRoom.create({ _id: roomId });
-      } catch (e) {
-        // If creating with provided id fails, create a new room and ignore provided id
-        room = await ChatRoom.create({});
-      }
-    }
-
-  // Normalize room id (Mongoose _id can be typed loosely); coerce to string safely
-  const resolvedRoomId = room && (room as any)._id ? String((room as any)._id) : String(roomId);
-  const message = await Message.create({ roomId: resolvedRoomId, senderId, senderName, text });
+    const storage = getStorageService();
+    const message = await storage.createMessage(
+      roomId,
+      senderId,
+      senderName,
+      text
+    );
     return res.status(201).json(message);
   } catch (err) {
     console.error(err);
@@ -34,7 +26,8 @@ export const createMessage = async (req: Request, res: Response) => {
 export const getMessages = async (req: Request, res: Response) => {
   const { roomId } = req.params;
   try {
-    const messages = await Message.find({ roomId }).sort({ createdAt: 1 }).limit(100);
+    const storage = getStorageService();
+    const messages = await storage.getMessages(roomId, 100);
     return res.json(messages);
   } catch (err) {
     console.error(err);
@@ -45,7 +38,8 @@ export const getMessages = async (req: Request, res: Response) => {
 export const createRoom = async (req: Request, res: Response) => {
   const { itemId } = req.body;
   try {
-    const room = await ChatRoom.create({ itemId });
+    const storage = getStorageService();
+    const room = await storage.createRoom(itemId);
     return res.status(201).json(room);
   } catch (err) {
     console.error(err);
@@ -56,7 +50,8 @@ export const createRoom = async (req: Request, res: Response) => {
 export const getRoomByItem = async (req: Request, res: Response) => {
   const { itemId } = req.params;
   try {
-    const room = await ChatRoom.findOne({ itemId });
+    const storage = getStorageService();
+    const room = await storage.getRoomByItemId(itemId);
     if (!room) return res.status(404).json({ error: "Room not found" });
     return res.json(room);
   } catch (err) {
