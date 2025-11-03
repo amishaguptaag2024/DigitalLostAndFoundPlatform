@@ -12,7 +12,14 @@ export const api = {
       body: JSON.stringify({ itemId }),
     });
     if (!response.ok) {
-      throw new Error("Failed to create room");
+      // Try to include the server response body in the thrown error to aid debugging
+      let bodyText: string;
+      try {
+        bodyText = await response.text();
+      } catch (e) {
+        bodyText = "<unable to read response body>";
+      }
+      throw new Error(`Failed to create room (status ${response.status}): ${bodyText}`);
     }
     return response.json();
   },
